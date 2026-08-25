@@ -25,6 +25,7 @@ Implementación del clásico **Tetris** en JavaScript vanilla, usando HTML5 Canv
   - [Tecnologías](#tecnologías)
   - [Estructura del proyecto](#estructura-del-proyecto)
   - [Personalización](#personalización)
+  - [Automatización de issues](#automatización-de-issues)
   - [Licencia](#licencia)
 
 ---
@@ -178,6 +179,32 @@ Algunos parámetros fáciles de tunear en `game.js`:
 | `dropInterval` | Velocidad inicial de caída en ms         | `1000`                |
 
 > Si cambias `COLS`, `ROWS` o `BLOCK`, recuerda ajustar también `width` y `height` del `<canvas id="board">` en `index.html` para que coincida (`COLS × BLOCK` × `ROWS × BLOCK`).
+
+---
+
+## Automatización de issues
+
+El workflow `.github/workflows/claude-issue-triage.yml` usa Claude Code (vía
+`anthropics/claude-code-action@v1`, con el mismo `CLAUDE_CODE_OAUTH_TOKEN` que
+ya usan `claude.yml` y `claude-code-review.yml`) para triar automáticamente
+cada issue que se abre o edita:
+
+- Le asigna labels de tipo (`bug`, `enhancement`, `documentation`, `question`)
+  y de área (`area:gameplay`, `area:rendering`, `area:input`, `area:scoring`,
+  `area:ui`), o `needs-info` si falta contexto para diagnosticar.
+- Publica un comentario con un diagnóstico técnico (código implicado, causa
+  probable, enfoque de solución y criterios de aceptación), que sirve de
+  punto de partida para implementar la solución. El comentario se actualiza
+  en el mismo sitio si el issue se edita, en vez de duplicarse.
+
+Los labels de área se crean una sola vez ejecutando:
+
+```bash
+bash .github/scripts/setup-labels.sh
+```
+
+Este workflow solo etiqueta y comenta: nunca modifica código, hace commits ni
+abre pull requests.
 
 ---
 

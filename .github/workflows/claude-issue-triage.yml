@@ -1,0 +1,116 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+concurrency:
+  group: issue-triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    # Evita bucles: no reaccionar a ediciones hechas por bots (p.ej. este mismo workflow
+    # etiquetando el issue no dispara 'edited', pero esta guarda es una defensa extra).
+    if: github.event.sender.type != 'Bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Issue Triage
+        id: claude-triage
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Mismo token OAuth ya configurado en los otros workflows del repo
+          # (claude.yml y claude-code-review.yml). No se usa ANTHROPIC_API_KEY.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          claude_args: '--allowedTools "Read,Grep,Glob,Bash(gh issue view:*),Bash(gh issue edit:*),Bash(gh issue comment:*),Bash(gh label list:*)"'
+
+          prompt: |
+            Eres un asistente de triage de issues para el repositorio de un
+            juego de Tetris vanilla (HTML5 Canvas + CSS + JavaScript, sin
+            dependencias). Tu tarea es analizar el issue #${{ github.event.issue.number }},
+            aplicarle labels apropiados y publicar un diagnóstico técnico
+            estructurado como comentario. NO modifiques archivos del repo,
+            no hagas commits ni abras pull requests: solo etiquetas y comentas.
+
+            Pasos:
+
+            1. Lee el issue completo:
+               gh issue view ${{ github.event.issue.number }} --json title,body,labels,author,comments
+
+            2. Lee los labels disponibles en el repo:
+               gh label list
+               Solo puedes usar labels que existan en esa lista. Si ninguno
+               encaja bien, no inventes uno nuevo.
+
+            3. Explora el código del repositorio con Read/Grep/Glob para
+               entender qué archivos y funciones están involucrados. Mapa de
+               referencia (ver también CLAUDE.md):
+               - game.js concentra toda la lógica: collide, tryRotate,
+                 rotateCW, clearLines, ghostY, spawn, loop, LINE_SCORES,
+                 dropInterval, y el estado global (board, current, next,
+                 score, lines, level, paused, gameOver).
+               - index.html define el DOM y los <canvas> (board, next-canvas).
+               - style.css define el aspecto visual.
+
+            4. Aplica labels con:
+               gh issue edit ${{ github.event.issue.number }} --add-label "..."
+               - Exactamente un label de tipo: bug, enhancement, documentation
+                 o question (usa el que exista con ese nombre en el repo).
+               - Uno o más labels de área si existen: area:gameplay,
+                 area:rendering, area:input, area:scoring, area:ui.
+               - Añade needs-info si el issue no tiene información suficiente
+                 para reproducir o entender el problema.
+               - No quites labels que ya estén puestos por una persona.
+
+            5. Escribe el diagnóstico en un archivo temporal y publícalo con:
+               gh issue comment ${{ github.event.issue.number }} --edit-last --create-if-none --body-file <archivo>
+               Esto crea el comentario la primera vez y actualiza el mismo
+               comentario (en vez de duplicarlo) cuando el issue se edita.
+
+            Formato exacto del comentario (usa Markdown, responde en el
+            mismo idioma en que está escrito el issue):
+
+            ## 🤖 Diagnóstico automático
+
+            **Tipo:** bug | mejora | duda | documentación
+            **Áreas:** area:gameplay, ...
+            **Complejidad estimada:** baja | media | alta
+
+            ### Resumen
+            Una o dos frases sobre qué pide o reporta el issue.
+
+            ### Código implicado
+            - `game.js:<línea>` — `nombreFuncion()` — por qué es relevante
+            - ...
+
+            ### Causa probable / análisis
+            Explicación técnica basada en el código que realmente leíste. Si
+            es una mejora, qué mecánica actual habría que cambiar.
+
+            ### Enfoque propuesto
+            Pasos concretos de implementación: qué función tocar y cómo,
+            incluyendo constantes de game.js a ajustar si aplica, y si hace
+            falta actualizar width/height del <canvas id="board"> en
+            index.html.
+
+            ### Criterios de aceptación
+            - [ ] ...
+
+            ### Información faltante
+            Inclúyela solo si aplica: qué hace falta para poder reproducir o
+            diagnosticar mejor.
+
+            ---
+            *Generado por Claude Code. Se actualiza automáticamente si el issue cambia.*
