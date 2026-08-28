@@ -23,8 +23,8 @@ All game logic lives in `game.js` as top-level functions operating on module-lev
 
 Key mechanics in `game.js`:
 
-- **Board model**: `ROWS × COLS` matrix; each cell is `0` (empty) or a color index `1–7` identifying which piece type locked there.
-- **Pieces**: defined in `PIECES` as square matrices. Rotation is done by `rotateCW` (transpose + reverse), not by predefined rotation states.
+- **Board model**: `ROWS × COLS` matrix; each cell is `0` (empty) or a color index `1–8` identifying which piece type locked there.
+- **Pieces**: defined in `PIECES` as square matrices. Rotation is done by `rotateCW` (transpose + reverse), not by predefined rotation states. Besides the 7 classic tetrominoes there is a non-convex "Tuerca" piece (3×3 ring with an empty center cell), so shapes are not guaranteed to be solid.
 - **Collision** (`collide`): checks a shape against board bounds and already-locked cells.
 - **Wall kicks** (`tryRotate`): after rotating, tries offsets `[0, -1, 1, -2, 2]` columns until a non-colliding position is found.
 - **Game loop** (`loop`): driven by `requestAnimationFrame`; accumulates elapsed time in `dropAccum` and advances the piece one row when it exceeds `dropInterval`.
