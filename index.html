@@ -36,6 +36,10 @@
           <span class="label">LEVEL</span>
           <span class="value" id="level">1</span>
         </div>
+        <div class="panel-section">
+          <span class="label">COMBO</span>
+          <span class="value" id="combo">0</span>
+        </div>
 
         <div class="panel-section">
           <span class="label">NEXT</span>
@@ -57,6 +61,17 @@
 
     <div id="overlay" class="overlay hidden">
       <div class="overlay-box">
+        <section class="screen" data-screen="start" hidden>
+          <p class="screen-title">TETRIS</p>
+          <div id="start-records" class="records"></div>
+          <label class="start-level-field">
+            <span>Nivel inicial</span>
+            <select id="start-level"></select>
+          </label>
+          <button id="play-btn" type="button">JUGAR</button>
+          <button id="reset-records-btn" type="button" class="btn-secondary">Borrar records</button>
+        </section>
+
         <section class="screen" data-screen="pause" hidden>
           <p class="screen-title">PAUSA</p>
           <div class="menu-buttons">
@@ -66,8 +81,9 @@
           </div>
           <label class="start-level-field">
             <span>Nivel inicial (próxima partida)</span>
-            <select id="start-level"></select>
+            <select id="start-level-pause"></select>
           </label>
+          <div id="pause-records" class="records"></div>
         </section>
 
         <section class="screen" data-screen="pause-controls" hidden>
@@ -85,6 +101,12 @@
         <section class="screen" data-screen="gameover" hidden>
           <p id="overlay-title" class="screen-title">GAME OVER</p>
           <p id="overlay-score"></p>
+          <div id="name-entry" hidden>
+            <p class="name-entry-hint">¡Entras en el top 5!</p>
+            <input id="player-name" type="text" maxlength="12" placeholder="Tu nombre" autocomplete="off" />
+            <button id="save-score-btn" type="button">Guardar</button>
+          </div>
+          <div id="gameover-records" class="records"></div>
           <button id="restart-btn">Reiniciar</button>
         </section>
       </div>
