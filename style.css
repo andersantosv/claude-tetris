@@ -112,7 +112,9 @@ body.light-theme {
 #board {
   display: block;
   border: 1px solid var(--border);
-  background: var(--panel-bg);
+  /* --board-bg lo fija applySkin() para skins con tablero propio (Neon);
+     si no está definido, cae al fondo del tema */
+  background: var(--board-bg, var(--panel-bg));
   border-radius: 4px;
   box-shadow: 0 0 40px var(--board-shadow);
 }
@@ -150,8 +152,24 @@ body.light-theme {
 #next-canvas {
   display: block;
   border: 1px solid var(--border);
-  background: var(--panel-bg);
+  background: var(--board-bg, var(--panel-bg));
   border-radius: 4px;
+}
+
+#skin-select {
+  background: var(--kbd-bg);
+  color: var(--text);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+#skin-select:focus-visible,
+#skin-select-start:focus-visible {
+  outline: 2px solid var(--title-color);
+  outline-offset: 2px;
 }
 
 /* ---- Controles ---- */
